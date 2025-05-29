@@ -631,6 +631,8 @@ proyecto_iac_local/
           }
         }
         ```
+        - "terraform apply" tras crear y/o modificar
+        ![](imagenes/Actividad19/fase4.png)
 
 
 #### Ejercicios
