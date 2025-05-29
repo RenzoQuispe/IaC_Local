@@ -35,9 +35,10 @@ resource "local_file" "config_json" {
   depends_on = [null_resource.crear_directorio_app]
 }
 
+# Uso de Python para generar metadatos más complejos
 data "external" "app_metadata_py" {
   program = [var.python_exe, "${path.root}/scripts/python/generate_app_metadata.py"]
-
+  # Más de 20 líneas de query simuladas
   query = merge(
     {
       app_name   = var.app_name
@@ -59,6 +60,7 @@ resource "local_file" "metadata_json" {
   depends_on = [null_resource.crear_directorio_app]
 }
 
+# Simular "arranque" de servicio
 resource "null_resource" "start_service_sh" {
   depends_on = [local_file.config_json, local_file.metadata_json]
 
