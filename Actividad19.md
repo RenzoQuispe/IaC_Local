@@ -220,6 +220,12 @@ proyecto_iac_local/
           value = module.config_entorno_principal.ruta_readme_modulo
         }
         ```
+        
+        - main.tf(raiz) modificado
+        ![](imagenes/Actividad19/fase2.1.png)
+        - archivos generados
+        ![](imagenes/Actividad19/fase2.2.png)
+
 **Fase 3: Módulos, plantillas y scripts Python**
 
   * **Conceptos:** Modularización, generación dinámica de archivos, integración con Python.
