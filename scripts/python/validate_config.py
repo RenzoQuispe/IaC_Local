@@ -25,6 +25,15 @@ def perform_complex_validations(config_data, file_path):
     for i in range(15):
         if config_data.get("settings",{}).get(f"s{i+1}") == None:
              errors.append(f"[{file_path}] Falta el setting s{i+1}")
+             
+    # verificar la presencia y formato basico de connection_string para el servicio database_connector
+    if data.get("applicationName") == "database_connector":
+        conn_str = data.get("connection_string")
+        if not isinstance(conn_str, str) or len(conn_str.strip()) == 0:
+            all_errors.append(f"[{file_path}] 'connection_string' es obligatorio y debe ser un string no vacio para database_connector")
+        elif not conn_str.startswith("Server="):  
+            all_warnings.append(f"[{file_path}] 'connection_string' formato incorrecto")
+
 
     return errors, warnings
 

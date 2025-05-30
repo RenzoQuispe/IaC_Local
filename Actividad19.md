@@ -642,12 +642,21 @@ proyecto_iac_local/
       * **Tarea:** Añade un nuevo "servicio" llamado `database_connector` al `local.common_app_config` en `main.tf`. Este servicio requiere un parámetro adicional en su configuración JSON llamado `connection_string`.
       * **Pasos:**
         1.  Modifica `main.tf` para incluir `database_connector`.
+          ![](imagenes/Actividad19/e1.1.png)
         2.  Modifica el módulo `application_service`:
               * Añade una nueva variable `connection_string_tpl` (opcional, por defecto un string vacío).
+              ![](imagenes/Actividad19/e1.2.1.png)
               * Actualiza `config.json.tpl` para incluir este nuevo campo.
               * Haz que el `connection_string` solo se incluya si la variable no está vacía (usar condicionales en la plantilla o en `locals` del módulo).
+              ![](imagenes/Actividad19/e1.2.2.png)
         3.  Actualiza el script `validate_config.py` para que verifique la presencia y formato básico de `connection_string` SOLO para el servicio `database_connector`.
+        ![](imagenes/Actividad19/e1.3.png)
       * **Reto adicional:** Haz que el `start_simulated_service.sh` cree un archivo `.db_lock` si el servicio es `database_connector`.
+      ![](imagenes/Actividad19/e1.4.png)
+      - terraform apply
+      ![](imagenes/Actividad19/e1.5.png)
+      - archivos creados
+      ![](imagenes/Actividad19/e1.6.png)
 
 2.  **Ejercicio de refactorización y principios:**
 

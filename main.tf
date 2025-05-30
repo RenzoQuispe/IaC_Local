@@ -28,19 +28,12 @@ locals {
     # Se pueden añadir más líneas fácilmente
     # app3 = { version = "2.1.0", port = 8083 }
     # app4 = { version = "1.0.0", port = 8084 }
+    database_connector = {
+      version = "1.0.0"
+      port    = 9090
+      connection_string = "Server=localhost;Database=testdb;User Id=admin;Password=secret;"
+    }
   }
-}
-
-module "simulated_apps" {
-  for_each = local.common_app_config
-
-  source                   = "./modules/application_service"
-  app_name                 = each.key
-  app_version              = each.value.version
-  app_port                 = each.value.port
-  base_install_path        = "${path.cwd}/generated_environment/services"
-  global_message_from_root = var.mensaje_global # Pasar la variable sensible
-  python_exe               = var.python_executable
 }
 
 output "detalles_apps_simuladas" {
@@ -99,4 +92,17 @@ module "config_entorno_principal" {
 
 output "readme_principal" {
   value = module.config_entorno_principal.ruta_readme_modulo
+}
+
+module "simulated_apps" {
+  for_each = local.common_app_config
+
+  source            = "./modules/application_service"
+  app_name          = each.key
+  app_version       = each.value.version
+  app_port          = each.value.port
+  base_install_path = "${path.cwd}/generated_environment/services"
+  global_message_from_root = var.mensaje_global
+  python_exe        = var.python_executable
+  connection_string_tpl = lookup(each.value, "connection_string", "")
 }

@@ -16,7 +16,11 @@ fi
 LOG_DIR="$INSTALL_PATH/logs"
 mkdir -p "$LOG_DIR"
 
-PID_FILE="$INSTALL_PATH/${APP_NAME}.pid"
+if [ "$APP_NAME" = "database_connector" ]; then
+  PID_FILE="$INSTALL_PATH/database.pid"
+else
+  PID_FILE="$INSTALL_PATH/${APP_NAME}.pid"
+fi
 LOG_FILE="$LOG_DIR/${APP_NAME}_startup.log"
 
 echo "Simulando inicio de $APP_NAME a las $(date)" >> "$LOG_FILE"
@@ -29,5 +33,13 @@ done
 # Crear un archivo PID simulado
 echo $$ > "$PID_FILE"  # $$ es el PID del script actual
 echo "Servicio $APP_NAME 'iniciado'. PID guardado en $PID_FILE" >> "$LOG_FILE"
+
+# reto adicional: creacion de un archivo db.lock
+if [ "$APP_NAME" = "database_connector" ]; then
+  touch "$INSTALL_PATH/.db_lock"
+  echo "Archivo .db_lock creado para database_connector" >> "$LOG_FILE"
+fi
 echo "Servicio $APP_NAME 'iniciado'. PID: $(cat "$PID_FILE")"
 echo "--- Fin inicio servicio $APP_NAME ---"
+
+

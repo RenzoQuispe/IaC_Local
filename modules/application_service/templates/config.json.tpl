@@ -16,5 +16,9 @@
         ,"s16": "val16", "s17": "val17", "s18": "val18", "s19": "val19", "s20": "val20"
         ,"s21": "val21", "s22": "val22", "s23": "val23", "s24": "val24", "s25": "val25"
         ,"s26": "val26", "s27": "val27", "s28": "val28", "s29": "val29", "s30": "val30"
-    }
+    }${connection_string_field}
+    %{ if connection_string_tpl != "" }
+    ,
+    "connection_string": "${connection_string_tpl}"
+    %{ endif }
 }

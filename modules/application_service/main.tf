@@ -7,6 +7,7 @@ variable "python_exe"               { type = string }
 
 locals {
   install_path = "${var.base_install_path}/${var.app_name}_v${var.app_version}"
+  connection_string_field = var.connection_string_tpl != "" ? ",\n\"connection_string\": \"${var.connection_string_tpl}\"" : ""
 }
 
 resource "null_resource" "crear_directorio_app" {
@@ -26,6 +27,8 @@ data "template_file" "app_config" {
     port_tpl        = var.app_port
     deployed_at_tpl = timestamp()
     message_tpl     = var.global_message_from_root
+    connection_string_field = local.connection_string_field
+    connection_string_tpl = var.connection_string != null ? var.connection_string : ""
   }
 }
 
