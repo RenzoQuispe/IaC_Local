@@ -38,7 +38,6 @@ resource "null_resource" "ejecutar_setup_inicial" {
   provisioner "local-exec" {
     command     = "bash ${path.module}/scripts/initial_setup.sh '${var.nombre_entorno_modulo}' '${local_file.readme_entorno.filename}'"
     interpreter = ["bash", "-c"]
-    working_dir = "${var.base_path}/${var.nombre_entorno_modulo}_data" # Ejecutar script desde aquí
   }
 }
 
