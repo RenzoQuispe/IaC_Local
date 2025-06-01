@@ -3,8 +3,67 @@ resource "local_file" "bienvenida" {
   filename = "${path.cwd}/generated_environment/bienvenida.txt"
 }
 
+resource "null_resource" "validate_all_configs" {
+  depends_on = [module.simulated_apps] # Asegura que las apps se creen primero
+  triggers = {
+    # Re-validar si cualquier output de las apps cambia (muy general, pero para el ejemplo)
+    app_outputs_json = jsonencode(module.simulated_apps)
+  }
+  provisioner "local-exec" {
+    command = "${var.python_executable} ${path.cwd}/scripts/python/validate_config.py ${path.cwd}/generated_environment/services"
+    # Opcional: ¿qué hacer si falla?
+    # on_failure = fail # o continue
+  }
+}
+
+resource "null_resource" "check_all_healths" {
+  depends_on = [null_resource.validate_all_configs] # Después de validar
+  # Triggers similares o basados en los PIDs si los expusiéramos como output
+  triggers = {
+    app_outputs_json = jsonencode(module.simulated_apps)
+  }
+  # Usar un bucle for para llamar al script de health check para cada servicio
+  # Esto es un poco más avanzado con provisioners, una forma simple es invocar un script que lo haga internamente
+  # O, si quisiéramos hacerlo directamente con N llamadas:
+  # (Esto es solo ilustrativo, un script que itere sería mejor para muchos servicios)
+  provisioner "local-exec" {
+    when        = create # o always si se quiere
+    command     = <<EOT
+      for service_dir in $(ls -d ${path.cwd}/generated_environment/services/*/); do
+        bash ${path.cwd}/scripts/bash/check_simulated_health.sh "$service_dir"
+      done
+    EOT
+    interpreter = ["bash", "-c"]
+  }
+}
+
 resource "random_id" "entorno_id" {
   byte_length = 8
+}
+
+module "config_entorno_principal" {
+  source                = "./modules/environment_setup"
+  base_path             = "${path.cwd}/generated_environment"
+  nombre_entorno_modulo = var.nombre_entorno
+}
+
+module "simulated_apps" {
+  for_each = local.common_app_config
+
+  source            = "./modules/application_service"
+  app_name          = each.key
+  app_version       = each.value.version
+  app_port          = each.value.port
+  base_install_path = "${path.cwd}/generated_environment/services"
+  global_message_from_root = var.mensaje_global
+  python_exe        = var.python_executable
+  connection_string_tpl = lookup(each.value, "connection_string", "")
+  deployment_id     = data.external.global_metadata_py.result.deployment_id
+}
+
+# Ejercicio 2: Metadatos común a *todos* los servicios en un "despliegue" (`deployment_id` global)
+data "external" "global_metadata_py" {
+  program = [var.python_executable, "${path.root}/scripts/python/generate_global_metadata.py"]
 }
 
 output "id_entorno" {
@@ -48,61 +107,9 @@ output "detalles_apps_simuladas" {
   sensitive = true # Porque contiene mensaje_global (indirectamente)
 }
 
-resource "null_resource" "validate_all_configs" {
-  depends_on = [module.simulated_apps] # Asegura que las apps se creen primero
-  triggers = {
-    # Re-validar si cualquier output de las apps cambia (muy general, pero para el ejemplo)
-    app_outputs_json = jsonencode(module.simulated_apps)
-  }
-  provisioner "local-exec" {
-    command = "${var.python_executable} ${path.cwd}/scripts/python/validate_config.py ${path.cwd}/generated_environment/services"
-    # Opcional: ¿qué hacer si falla?
-    # on_failure = fail # o continue
-  }
-}
-
-resource "null_resource" "check_all_healths" {
-  depends_on = [null_resource.validate_all_configs] # Después de validar
-  # Triggers similares o basados en los PIDs si los expusiéramos como output
-  triggers = {
-    app_outputs_json = jsonencode(module.simulated_apps)
-  }
-  # Usar un bucle for para llamar al script de health check para cada servicio
-  # Esto es un poco más avanzado con provisioners, una forma simple es invocar un script que lo haga internamente
-  # O, si quisiéramos hacerlo directamente con N llamadas:
-  # (Esto es solo ilustrativo, un script que itere sería mejor para muchos servicios)
-  provisioner "local-exec" {
-    when        = create # o always si se quiere
-    command     = <<EOT
-      for service_dir in $(ls -d ${path.cwd}/generated_environment/services/*/); do
-        bash ${path.cwd}/scripts/bash/check_simulated_health.sh "$service_dir"
-      done
-    EOT
-    interpreter = ["bash", "-c"]
-  }
-}
-
-
-
-module "config_entorno_principal" {
-  source                = "./modules/environment_setup"
-  base_path             = "${path.cwd}/generated_environment"
-  nombre_entorno_modulo = var.nombre_entorno
-}
-
+# README.md en "/Proyecto_iac_local/generated_environment/desarrollo_data/README.md"
 output "readme_principal" {
   value = module.config_entorno_principal.ruta_readme_modulo
 }
 
-module "simulated_apps" {
-  for_each = local.common_app_config
 
-  source            = "./modules/application_service"
-  app_name          = each.key
-  app_version       = each.value.version
-  app_port          = each.value.port
-  base_install_path = "${path.cwd}/generated_environment/services"
-  global_message_from_root = var.mensaje_global
-  python_exe        = var.python_executable
-  connection_string_tpl = lookup(each.value, "connection_string", "")
-}

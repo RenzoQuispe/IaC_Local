@@ -663,11 +663,18 @@ proyecto_iac_local/
       * **Tarea:** Actualmente, el `generate_app_metadata.py` se llama para cada servicio. Imagina que parte de los metadatos es común a *todos* los servicios en un "despliegue" (ej. un `deployment_id` global).
       * **Pasos:**
         1.  Crea un nuevo script Python, `generate_global_metadata.py`, que genere este `deployment_id` (puede ser un `random_uuid`).
+        ![](imagenes/Actividad19/2.1.png)
         2.  En el `main.tf` raíz, usa `data "external"` para llamar a este nuevo script UNA SOLA VEZ.
+        ![](imagenes/Actividad19/2.2.png)
         3.  Pasa el `deployment_id` resultante como una variable de entrada al módulo `application_service`.
+        ![](imagenes/Actividad19/2.3.png)
         4.  Modifica `generate_app_metadata.py` y/o `config.json.tpl` dentro del módulo `application_service` para que incorpore este `deployment_id` global.
+        ![](imagenes/Actividad19/2.4.png)
+        - Resultado
+        ![](imagenes/Actividad19/2.5.png)
       * **Discusión:** ¿Cómo mejora esto la composabilidad y reduce la redundancia? ¿Cómo afecta la idempotencia?
 
+        Esta implementacion separa claramente caracteristicas generales de todos los servicios de las caracteristicas especificas de cada uno, lo que hace que el codigo sea mas facil de mantener y reutilizar , ademas tambien reduce la redundancia ya que el deployment_id se genera una vez para todos los servicios. La implementacion hecha no es idempotente, el deployment_id cambia cada vez que ejecutamos terraform apply.
 3.  **Ejercicio de idempotencia y scripts externos:**
 
       * **Tarea:** El script `initial_setup.sh` crea `placeholder_$(date +%s).txt`, lo que significa que cada vez que se ejecuta (si los `triggers` lo permiten), crea un nuevo archivo.

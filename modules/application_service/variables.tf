@@ -8,3 +8,7 @@ variable "connection_string" {
   default     = null
   description = "cadena de conexion opcional (solo usada para la plantilla)"
 }
+variable "deployment_id" {
+  type        = string
+  description = "Identificador unico de un despliegue"
+}

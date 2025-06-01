@@ -24,6 +24,7 @@ data "template_file" "app_config" {
   vars = {
     app_name_tpl    = var.app_name
     app_version_tpl = var.app_version
+    deployment_id_tpl = var.deployment_id
     port_tpl        = var.app_port
     deployed_at_tpl = timestamp()
     message_tpl     = var.global_message_from_root
